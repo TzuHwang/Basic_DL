@@ -1,0 +1,54 @@
+set -e
+set -x
+
+data_root="D:/data/fish/Fish_Dataset/Fish_Dataset"
+output_root="./outputs"
+config_name="fishcls"
+
+CUDA_VISIBLE_DEVICES=0 python main.py \
+    --data-root ${data_root} \
+    --output-root ${output_root} \
+    --config-name ${config_name} \
+    \
+    --section training \
+    \
+    --dataset FishCls \
+    --data-format img \
+    --aug default \
+    --crop 0.8 \
+    --loading-method all \
+    --normalize \
+    --maxv 255.0 \
+    --batch-size 16 \
+    --num-workers 4 \
+    --no-label-data-portion 0.8 \
+    \
+    --task classification \
+    --model-name YOLO_v8 \
+    --scheduler cosine \
+    --epoch 400 \
+    --output-channel-num 9 \
+    --dropout 0.5 \
+    --optimizer-name adam \
+    --learning-rate 0.001 \
+    --momentum 0.9 \
+    --weight-decay 0.0 \
+    --scheduler-name CosineAnnealingLR \
+    --warmup-epoch 50 \
+    --step-size 10 \
+    --learning-rate-decay 0.1 \
+    --multiplier 1.0 \
+    --no-label-data-portion 0.9 \
+    --use-pretrained \
+    \
+    --losses CrossEntropyLoss \
+    --channel-weights 1.0 \
+    --loss-weights 1.0 \
+    \
+    --writer-name FishCls \
+    --print-frequency 10 \
+    --rm-exist-log \
+    \
+    --save-frequency 50 \
+    --save-best \
+    --init-point 0.1
