@@ -14,7 +14,6 @@ def train(epoch, train_loader, model, optimizer, scheduler, loss, writer):
     for i, (data, target) in enumerate(train_loader):
         optimizer.zero_grad()
         input, target = data.cuda().float(), target.cuda()
-
         if args.task in ["segmentation", "classification"]:
             pred = model(input)
             loss_matrix = loss.get_loss_value(pred, target)

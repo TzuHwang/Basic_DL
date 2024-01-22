@@ -24,7 +24,7 @@ CUDA_VISIBLE_DEVICES=0 python main.py \
     --no-label-data-portion 0.8 \
     \
     --task classification \
-    --model-name YOLO_v8 \
+    --model-name VGG16 \
     --scheduler cosine \
     --epoch 400 \
     --output-channel-num 9 \

@@ -388,7 +388,6 @@ class YOLO_v8(nn.Module):
             )
         """
         self.model = YOLO("yolov8n.pt") if use_pretrained else YOLO("yolov8n.yaml")
-        import pdb;pdb.set_trace()
 
     def forward(self, x):
         logit = self.model(x)
