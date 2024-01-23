@@ -8,8 +8,10 @@ This repo was made for simple Deep-learning application for new comers.
 ### Software 
 1. Python==3.8.13
 2. Install the pytorch with cudaversion corresponding to your GPU from https://pytorch.org/ or https://pytorch.org/get-started/previous-versions/.
+
     `pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113`
 3. Install the rest of packages in requirement.txt
+
     `pip install -r requirements.txt`
 
 ## Test Dataset Download
@@ -19,8 +21,10 @@ This repo was made for simple Deep-learning application for new comers.
 All shell scripts shall be stored in the 'configs' folder. Copy and modify the script following the description in the arguments for your own use.
 
 1. Run classification task demo:
+
     `bash configs\fishcls.sh`
 2. Run segmentation task demo:
+
     `bash configs\fishseg.sh`
 
 ## Architecture
@@ -44,8 +48,5 @@ The folder stores the data loaders. For adding new data loaders, design a data l
 * BCEloss: A loss for binary classification. The input of this loss must be probability.
 * CEWithLogitsLoss: A loss for binary classification. The input of this loss must be logit.
 
-### tb_visualizaion
-
-### main
-
 ## Future Plane
+There are few models I was planed to add to this repo like GraphSage, GCN, and YOLO_v8.
