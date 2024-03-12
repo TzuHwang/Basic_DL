@@ -37,12 +37,16 @@ class Access_Args:
         self.parser.add_argument(
             "--max_iter", type=int, help="Setting the max iter number per epoch",
             default=None
-            )                
+            )          
 
     def _args_dataset(self):
         self.parser.add_argument(
             "--dataset", type=str, help="The name of dataset"
             )
+        self.parser.add_argument(
+            "--fold", type=int, help="The fold idx for cross validation",
+            default=0
+            )  
         self.parser.add_argument(
             "--data-format", type=str, help="The format of data, ex: img, table"
             )        
@@ -52,7 +56,11 @@ class Access_Args:
         self.parser.add_argument(
             "--crop", type=float, help="The crop size",
             default=1.
-            )        
+            )
+        self.parser.add_argument(
+            "--image_size", type=int, help="The crop size",
+            default=224
+            )                
         self.parser.add_argument(
             "--loading-method", type=str, help="The method of data loading, ex: img_2D, img_2.5D, table, ......etc",
             default='img_2D'
@@ -103,12 +111,22 @@ class Access_Args:
             "--output-channel-num", type=int, help="The chinnel number of model outputs"
             )
         self.parser.add_argument(
-            '--use-pretrained', action='store_true', help='Use pretrained model', 
+            '--use-pretrained', type=str, help='Use pretrained model', 
+            default=None
             )
         self.parser.add_argument(
             "--dropout", type=float, help='During training, randomly zeroes some of the elements of the input tensor with probability p using samples from a Bernoulli distribution.',
             default=0
-        )       
+        )     
+        ## graph_spesific_args
+        self.parser.add_argument(
+            "--hidden-channel-num", type=int, help="The number of the hidden channel",
+            default=32
+            )
+        self.parser.add_argument(
+            "--layer-num", type=int, help="The depth of graph conv layers",
+            default=5
+            )        
         
         # optimizer
         self.parser.add_argument(
@@ -147,6 +165,11 @@ class Access_Args:
             "--multiplier", type=float, help="target learning rate = base lr * multiplier if multiplier > 1.0. if multiplier = 1.0, lr starts from 0 and ends up with the base_lr.",
             default=1.
             )
+        
+        # Resume model
+        self.parser.add_argument(
+            '--load-best', action='store_true', help='Load the state with lowest loss used training or eval', 
+            )
 
     def _args_loss(self):
         self.parser.add_argument(
@@ -176,7 +199,7 @@ class Access_Args:
         self.parser.add_argument(
             '--rm-exist-log', action='store_true', help='Remove the exist log in output root', 
             )
-
+        
     def _args_save(self):
         self.parser.add_argument(
             "--save-frequency", type=int, help="A checkpoint was saved per x epoch num",

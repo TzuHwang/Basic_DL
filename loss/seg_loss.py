@@ -4,10 +4,6 @@ from torch import nn
 
 __all__ = ["SoftDiceLoss", "IoULoss"]
 
-"""
-Codes are referenced from https://github.com/JunMa11/SegLossOdyssey.
-"""
-
 def get_dice(pred, target, smooth = 1.):
     '''dice = (2 * intersection(pred, target)) / (pred + target)'''
     intersection = (pred * target).sum()

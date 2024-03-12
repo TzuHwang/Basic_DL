@@ -32,20 +32,18 @@ class Loss_Fcns:
         return self.loss_fcns
     
     def get_loss_value(self, pred, target):
-        total_loss = 0
-        logit = pred
-        prob = translate_pred(pred)
+        total_loss, logit, prob = 0, pred, translate_pred(pred)
         if target.shape != pred.shape:
-            target = one_hot_encoding(target, pred.shape[1])
+            target = one_hot_encoding(target, pred.shape[1]) if pred.shape[1]>1 else target.unsqueeze(1)
         assert len(self.weights) == len(self.losses)
         for weight, loss in zip(self.weights, self.losses):
             if loss in seg_loss.__all__:
                 self.loss_values[loss] = self.loss_fcns[loss](prob, target.long())
             elif loss in ce_loss.__all__:
-                if loss != "BCELoss":
-                    self.loss_values[loss] = self.loss_fcns[loss](logit, target.float())
-                else:
+                if loss == "BCELoss":
                     self.loss_values[loss] = self.loss_fcns[loss](prob, target.float())
+                else:
+                    self.loss_values[loss] = self.loss_fcns[loss](logit, target.float())
             total_loss += self.loss_values[loss]*weight
         self.loss_values['loss'] = total_loss
         return self.loss_values

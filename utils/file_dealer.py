@@ -21,7 +21,8 @@ def json_saver(fpth, jsdata):
         json.dump(jsdata, f, indent=2)
 
 def save_checkpoint(args, epoch, model, optimizer, scheduler, is_best=False):
-    save_pth = f"{args.output_root}/{args.config_name}/epoch_{epoch}.pth"
+    fname = "epoch_best.pth" if is_best else f"epoch_{epoch}.pth"
+    save_pth = f"{args.output_root}/{args.config_name}/{fname}"
     if epoch % args.save_frequency==0 or is_best:
         ckpt = {
             "args":args,

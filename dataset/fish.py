@@ -31,7 +31,7 @@ def to_one_hot(anno, category, channel_num):
     return one_hot_anno
 
 class FishSeg(data.Dataset):
-    def __init__(self, data_root, loading_method, normalize, maxv, mod, augmenter):
+    def __init__(self, data_root, loading_method, normalize, maxv, split, augmenter):
         self.data_root = data_root
         _, species, _ = next(os.walk(self.data_root), ([],[],[]))
         if loading_method == "all":
@@ -39,7 +39,7 @@ class FishSeg(data.Dataset):
         else:
             assert loading_method in species
             self.species = [loading_method]
-        self.mod = mod
+        self.split = split
         self.normalize = normalize
         self.maxv = maxv
 
@@ -55,11 +55,11 @@ class FishSeg(data.Dataset):
 
             files = natsort.natsorted(os.listdir(input_root))
             datasize = len(files)
-            if self.mod == "train":
+            if self.split == "train":
                 start, end = 0, int(datasize*self.split_portion[0])
-            elif self.mod == "val":
+            elif self.split == "val":
                 start, end = int(datasize*self.split_portion[0]), int(datasize*self.split_portion[1])
-            elif self.mod == "test":
+            elif self.split == "test":
                 start, end = int(datasize*self.split_portion[1]), int(datasize*self.split_portion[2])
             files = files[start: end]
             for file in files:
@@ -86,10 +86,10 @@ class FishSeg(data.Dataset):
         return orig , anno
     
 class FishCls(data.Dataset):
-    def __init__(self, data_root, loading_method, normalize, maxv, mod, augmenter):
+    def __init__(self, data_root, loading_method, normalize, maxv, split, augmenter):
         self.data_root = data_root
         _, self.species, _ = next(os.walk(self.data_root), ([],[],[]))
-        self.mod = mod
+        self.split = split
         self.normalize = normalize
         self.maxv = maxv
 
@@ -105,11 +105,13 @@ class FishCls(data.Dataset):
 
             files = natsort.natsorted(os.listdir(input_root))
             datasize = len(files)
-            if self.mod == "train":
+            if self.split == "train":
                 start, end = 0, int(datasize*self.split_portion[0])
-            elif self.mod == "val":
+            elif self.split == "val":
                 start, end = int(datasize*self.split_portion[0]), int(datasize*self.split_portion[1])
-            elif self.mod == "test":
+            elif self.split == "final_train":
+                start, end = 0, int(datasize*self.split_portion[1])
+            elif self.split == "test":
                 start, end = int(datasize*self.split_portion[1]), int(datasize*self.split_portion[2])
             files = files[start: end]
             for file in files:

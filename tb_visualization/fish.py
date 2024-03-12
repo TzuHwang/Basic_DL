@@ -104,8 +104,8 @@ class FishCls:
         for loss in self.loss_matrix:
             self.writer.add_scalar(f"{self.mod}_{loss}", self.loss_matrix[loss], self.iter)
 
-        for standard in self.confusion_matrix:
-            self.writer.add_scalar(f"{self.mod}_{standard}", self.confusion_matrix[standard], self.iter)
+        for standard in self.confusion_matrix["scaler"]:
+            self.writer.add_scalar(f"{self.mod}_{standard}", self.confusion_matrix["scaler"][standard], self.iter)
 
     def _draw_img_grid(self):
         # TensorBoard's default data format is CHW. The default setting works with tensors. If your input is a NumPy array, set it to HWC

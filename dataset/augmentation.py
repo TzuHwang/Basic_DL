@@ -27,4 +27,6 @@ def data_augmenter(data_format, aug, crop=1, image_size=224):
                 RandomResizedCrop(image_size, image_size, scale=(1., 1.)),
                 ToTensorV2(),
             ])
+    else:
+        augmenter = None
     return augmenter

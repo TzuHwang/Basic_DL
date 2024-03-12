@@ -85,18 +85,21 @@ class VGG16(nn.Module):
             )
         )
         '''
-        self.model = vgg16(pretrained = use_pretrained)
+        self.model = vgg16(weights = use_pretrained)
         # Insure input channel
         self.model.features[0] = nn.Conv2d(input_channels, 64, kernel_size=(3, 3), stride=(2, 2))
         # Insure output channel
         self.model.classifier[6] = nn.Linear(in_features=4096, out_features=output_channel_num, bias=True)
-        # Add dropout
-        feats_list = list(self.model.features)
-        new_feats_list = []
-        for feat in feats_list:
-            new_feats_list.append(feat)
-            if isinstance(feat, nn.Conv2d):
-                new_feats_list.append(nn.Dropout(p = dropout, inplace = True))
+        # Make dropout rate adjustable
+        self.model.classifier[2] = nn.Dropout(p=dropout, inplace=False)
+        self.model.classifier[5] = nn.Dropout(p=dropout, inplace=False)
+        # # Add dropout
+        # feats_list = list(self.model.features)
+        # new_feats_list = []
+        # for feat in feats_list:
+        #     new_feats_list.append(feat)
+        #     if isinstance(feat, nn.Conv2d):
+        #         new_feats_list.append(nn.Dropout(p = dropout, inplace = True))
 
     def forward(self, x):
         logit = self.model(x)

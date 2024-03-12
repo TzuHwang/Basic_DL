@@ -1,7 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn
 import torch, cv2
 import torch.nn.functional as F
-from sklearn.metrics import accuracy_score, recall_score, precision_score, roc_auc_score
+from sklearn.metrics import accuracy_score, recall_score, precision_score, roc_auc_score, roc_curve, confusion_matrix
 
 from .cv_lib import imgmerge
 
@@ -27,12 +30,13 @@ def concat_imgs(bases, covers, num_classes, row_num = 2, for_pred = False, task 
     if for_pred:
         covers = translate_pred(covers, to_one_hot = True)
         if task == "classification":
-            covers = np.argmax(covers, 1)
+            covers = np.argmax(covers, 1) if covers.shape[1] > 1 else covers.squeeze().int()
+    
     bases = torch.moveaxis(bases, 1, -1) if c == 3 else bases.squeeze()
     for i, (base, cover) in enumerate(zip(bases, covers)):
         base = (base.numpy()*255).astype(np.uint8)
         cover = (cover.numpy()*255).astype(np.uint8) if task == "segmentation" else cover.numpy()
-        img = cv2.cvtColor(base, cv2.COLOR_GRAY2RGB) if c == 1 else base.copy()
+        img = cv2.cvtColor(base, cv2.COLOR_GRAY2RGB) if c == 1 else cv2.cvtColor(base, cv2.COLOR_BGR2RGB)
         # if len(colors["channel_1"]) == 4:
         #     img = cv2.cvtColor(base, cv2.COLOR_GRAY2RGBA if c == 1 else cv2.COLOR_RGB2RGBA)
         #     for k, channel in enumerate(cover):
@@ -90,22 +94,39 @@ def get_similarity(pred, target, smooth = 1., fucn = ["SoftDice"]):
 
 def get_confusion(pred, target):
     prob = translate_pred(pred)
-    pred, num_classes = torch.argmax(prob, 1), prob.shape[1]
+    # In binary prediction case; the output_channel_num of prob could be 1.
+    if prob.shape[1] == 1:
+        prob_neg = 1-prob
+        prob = torch.concatenate((prob_neg, prob), axis=1)
 
+    pred, num_classes = torch.argmax(prob, 1), prob.shape[1]
     assert pred.shape == target.shape
 
     acc = accuracy_score(target, pred)
     pre = precision_score(target, pred, average = "macro", zero_division=0)
     rec = recall_score(target, pred, average = "macro", zero_division=0)
+    cf_matrix = confusion_matrix(target, pred) # gt in y-ax; pred in x-ax
+    cf_matrix = cf_matrix/ np.sum(cf_matrix, axis=1)[:, None]
+
     one_hot = one_hot_encoding(target, num_classes)
-    auroc = []
+    auroc, auc_curves = [],  []
+
     for i in range(num_classes):
         if len(np.unique(one_hot[:, i])) == 1:
             continue
         auroc.append(roc_auc_score(one_hot[:, i], prob[:, i], average = "macro", multi_class="ovr"))
+        # roc_curve return a list of fpr, tpr and thresholds
+        auc_curves.append(roc_curve(one_hot[:, i], prob[:, i]))
+
     return {
-            "accuracy": acc, 
-            "precision":pre, 
-            "recall":rec, 
-            "auroc": np.mean(auroc)
+            "scaler":{
+                      "accuracy": acc, 
+                      "precision":pre, 
+                      "recall":rec, 
+                      "auroc": np.mean(auroc),
+                     },
+            "plot":{
+                    "confusion_matrix": cf_matrix,
+                    "auc_curves": auc_curves
+                    }
             }

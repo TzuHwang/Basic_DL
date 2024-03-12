@@ -1,6 +1,8 @@
 import os, sys, natsort
 from .segmentation import Seg_models
 from .classification import Cls_models
+from .detection import Det_models
+from .multi_tasks import MultiTask_models
 
 import torch
 from torch.optim import SGD, Adam
@@ -37,8 +39,26 @@ class Construct_Model:
                 self.input_channel_num,
                 self.output_channel_num,
                 self.use_pretrained,
+                self.dropout,
+                args.hidden_channel_num,
+                args.layer_num
+                ).get_model()
+        elif self.task == "detection":
+            self.model = Det_models(
+                self.model_name,
+                self.input_channel_num,
+                self.output_channel_num,
+                self.use_pretrained,
                 self.dropout
-                ).get_model()        
+                ).get_model()
+        elif self.task == "multitask":
+            self.model = MultiTask_models(
+                self.model_name,
+                self.input_channel_num,
+                self.output_channel_num,
+                self.use_pretrained,
+                self.dropout,
+                ).get_model()
 
         # Optimizer
         # Optimizers adjust the parameters of the model during training in order to minimize the error between the predicted output and the actual output.
@@ -65,10 +85,11 @@ class Construct_Model:
 
         # Resume training
         self.model_save_dir = f"{args.output_root}/{args.config_name}"
-        self.init_epoch = 0
+        self.load_best = args.load_best
+        self.init_epoch = 1
         
     def get_model(self):
-        # self._resume()
+        self._resume()
         return self.model, self.optimizer, self.scheduler
     
     def get_init_epoch(self):
@@ -120,7 +141,8 @@ class Construct_Model:
         if "log" in ckpts:
             ckpts.remove("log")
         if len(ckpts) > 0:
-            ckpt = torch.load(f"{self.model_save_dir}/{ckpts[-1]}")
+            fname = "epoch_best.pth" if self.load_best and "epoch_best.pth" in ckpts else ckpts[-1]
+            ckpt = torch.load(f"{self.model_save_dir}/{fname}")
             self.init_epoch = ckpt["epoch"]
             self.model.load_state_dict(ckpt["model"])
             self.optimizer.load_state_dict(ckpt["optimizer"])

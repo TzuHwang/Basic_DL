@@ -10,3 +10,4 @@ pyvista==0.42.3
 scikit-learn==1.1.0
 tensorboard==2.8.0
 ultralytics==8.1.2
+seaborn==0.12.2

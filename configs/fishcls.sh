@@ -39,7 +39,7 @@ CUDA_VISIBLE_DEVICES=0 python main.py \
     --learning-rate-decay 0.1 \
     --multiplier 1.0 \
     --no-label-data-portion 0.9 \
-    --use-pretrained \
+    --use-pretrained DEFAULT \
     \
     --losses CrossEntropyLoss \
     --channel-weights 1.0 \
